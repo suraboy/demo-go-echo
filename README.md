@@ -1,8 +1,5 @@
 # Go-echo
 ======
-
-NOTE
-----
 This project use in learning Golang , If any mistake, apologize.
 
 Get Started
