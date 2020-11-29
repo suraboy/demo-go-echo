@@ -10,15 +10,14 @@ services:
     ports:
       - "7304:8080"
     volumes:
-      - ./:/app
-#      - ./api/.env.local:/go/src/api/.env:cached
+      - ./:/app:cached
+      - ./.env.local:/app/.env:cached
     environment:
       APP_ENV: local
     networks:
       network-horeca:
         aliases:
           - go-echo.eggsmartpos.local
-
 networks:
   network-horeca:
     external: true
