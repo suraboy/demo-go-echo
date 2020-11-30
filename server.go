@@ -38,7 +38,7 @@ type (
 	}
 )
 
-//ให้เชื่อมต่อฐานข้อมูลเมื่อ Initialize
+//connect database mysql by gorm
 func (h *Handler) connectDB() {
 	err := godotenv.Load()
 	if err != nil {
@@ -94,7 +94,7 @@ func (h *Handler) GetAllUser(c echo.Context) (err error) {
 	h.DB.Find(&user)
 	return c.JSON(http.StatusOK, echo.Map{"data": user})
 }
-
+//find uset by id
 func (h *Handler) FindUser(c echo.Context) (err error) {
 	id := c.Param("id")
 	user := Users{}
