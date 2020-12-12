@@ -1,7 +1,7 @@
 FROM golang
 WORKDIR /app
 COPY . .
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o app .
+RUN CGO_ENABLED=0 GOOS=linux GO111MODULE=on go build -mod=vendor -mod=mod -a -o app .
 
 RUN go get github.com/githubnemo/CompileDaemon
 

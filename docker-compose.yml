@@ -10,8 +10,8 @@ services:
     ports:
       - "7304:8080"
     volumes:
-      - ./:/app:cached
-      - ./.env.local:/app/.env:cached
+      - ./:/app
+      - ./.env.local:/app/.env
     environment:
       APP_ENV: local
     networks:

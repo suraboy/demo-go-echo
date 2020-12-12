@@ -4,6 +4,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo"
 	"golang.org/x/crypto/bcrypt"
+	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"log"
 	"net/http"
