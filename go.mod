@@ -13,4 +13,5 @@ require (
 	golang.org/x/crypto v0.0.0-20201124201722-c8d3bf9c5392 // indirect
 	gorm.io/driver/mysql v1.0.3
 	gorm.io/gorm v1.20.7
+	github.com/suraboy/go-echo v1.0.2
 )
