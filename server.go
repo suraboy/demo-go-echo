@@ -4,7 +4,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
-	"github.com/suraboy/go-echo/routes"
+	//"github.com/suraboy/go-echo/routes"
 	"golang.org/x/crypto/bcrypt"
 	_ "golang.org/x/crypto/bcrypt"
 	"gorm.io/driver/mysql"
@@ -28,7 +28,7 @@ func main() {
 	//e.GET("/v1/users", h.GetAllUser)
 	//e.GET("/v1/users/:id", h.FindUser)
 	//e.POST("/v1/users", h.CreateUser)
-	routes.UserRoute(e)
+	//routes.UserRoute(e)
 
 	e.Logger.Fatal(e.Start(":8080"))
 }
