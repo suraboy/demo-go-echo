@@ -11,11 +11,8 @@ import (
 	"os"
 	"time"
 )
-
-func init() {
-	e := echo.New()
+func UserRoute(e *echo.Echo)  {
 	h := Handler{}
-	h.connectDB()
 	e.GET("/v1/users", h.GetAllUser)
 	e.GET("/v1/users/:id", h.FindUser)
 	e.POST("/v1/users", h.CreateUser)
