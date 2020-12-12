@@ -11,7 +11,7 @@ services:
       - "7304:8080"
     volumes:
       - ./:/app
-      - ./.env.local:/app/.env
+      - ./.env.local:/app/.env:cached
     environment:
       APP_ENV: local
     networks:

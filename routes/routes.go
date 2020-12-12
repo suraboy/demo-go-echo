@@ -6,23 +6,17 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"log"
 	"net/http"
 	"os"
 	"time"
+	"log"
 )
-func UserRoute(e *echo.Echo)  {
-	h := Handler{}
-	e.GET("/v1/users", h.GetAllUser)
-	e.GET("/v1/users/:id", h.FindUser)
-	e.POST("/v1/users", h.CreateUser)
-}
-
 type (
 	Handler struct {
 		DB *gorm.DB
 	}
 )
+
 
 //connect database mysql by gorm
 func (h *Handler) connectDB() {
@@ -42,6 +36,15 @@ func (h *Handler) connectDB() {
 		log.Fatal(err.Error())
 	}
 	h.DB = db
+}
+
+func UserRoute(e *echo.Echo)  {
+	h := Handler{}
+	h.connectDB()
+	e.GET("/v1/users", h.GetAllUser)
+	e.GET("/v1/users/:id", h.FindUser)
+	e.POST("/v1/users", h.CreateUser)
+	return
 }
 // User
 type Users struct {
