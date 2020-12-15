@@ -11,12 +11,11 @@ import (
 
 
 func UserRoute(e *echo.Echo) {
-	h := mysql.ConnectDB{}
-	e.GET("/v1/users", h.GetAllUser)
-	e.GET("/v1/users/:id", h.FindUser)
-	e.POST("/v1/users", h.CreateUser)
-	e.PUT("/v1/users/:id", h.UpdateUser)
-	e.DELETE("/v1/users/:id", h.DeleteUser)
+	e.GET("/v1/users", GetAllUser)
+	e.GET("/v1/users/:id", FindUser)
+	e.POST("/v1/users", CreateUser)
+	e.PUT("/v1/users/:id", UpdateUser)
+	e.DELETE("/v1/users/:id", DeleteUser)
 }
 
 var messageError struct {
@@ -31,20 +30,22 @@ type messageFormat struct {
 
 //get user list
 func GetAllUser(c echo.Context) (err error) {
+	h := mysql.ConnectDB{}
+	h.DB = mysql.connectDB()
 	var user []models.Users
-	db.Find(&user)
+	h.DB.Find(&user)
 	return c.JSON(http.StatusOK, echo.Map{"datas": user})
 }
 
 //find uset by id
 func FindUser(c echo.Context) (err error) {
-	db := mysql.connectDB()
+	h := mysql.ConnectDB{}
 	id := c.Param("id")
 	user := models.Users{}
 
-	if err := db.Find(&user, id).Error; err != nil || db.Find(&user, id).RowsAffected == 0 {
+	if err := h.DB.Find(&user, id).Error; err != nil || h.DB.Find(&user, id).RowsAffected == 0 {
 		var msgError messageFormat
-		if db.Find(&user, id).RowsAffected == 0 {
+		if h.DB.Find(&user, id).RowsAffected == 0 {
 			msgError.StatusCode = http.StatusNotFound
 			msgError.Message = "Not Found"
 		} else {
@@ -61,7 +62,7 @@ func FindUser(c echo.Context) (err error) {
 
 //create user
 func CreateUser(c echo.Context) (err error) {
-	db := mysql.connectDB()
+	h := mysql.ConnectDB{}
 	user := new(models.Users)
 	if err = c.Bind(user); err != nil {
 		var msgError messageFormat
@@ -77,7 +78,7 @@ func CreateUser(c echo.Context) (err error) {
 		panic(err)
 	}
 	user.Password = string(hashedPassword)
-	if err := db.Create(&user).Error; err != nil {
+	if err := h.DB.Create(&user).Error; err != nil {
 		var msgError messageFormat
 		msgError.StatusCode = http.StatusExpectationFailed
 		msgError.Message = "Expectation Failed"
@@ -92,7 +93,7 @@ func CreateUser(c echo.Context) (err error) {
 //update user
 func UpdateUser(c echo.Context) (err error) {
 	pass := ""
-	db := mysql.connectDB()
+	h := mysql.ConnectDB{}
 	id := c.Param("id")
 	user := models.Users{}
 	var msgError messageFormat
@@ -110,7 +111,7 @@ func UpdateUser(c echo.Context) (err error) {
 		pass = string(hashedPassword)
 	}
 
-	if err := db.Find(&user, id).Error; err != nil {
+	if err := h.DB.Find(&user, id).Error; err != nil {
 		msgError.StatusCode = http.StatusNotFound
 		msgError.Message = "Not Found"
 		messageError.Errors = msgError
@@ -121,7 +122,7 @@ func UpdateUser(c echo.Context) (err error) {
 		user.Password = pass
 	}
 
-	if err := db.Save(&user).Error; err != nil {
+	if err := h.DB.Save(&user).Error; err != nil {
 		msgError.StatusCode = http.StatusExpectationFailed
 		msgError.Message = "Expectation Failed"
 		msgError.Error = err.Error()
@@ -134,17 +135,17 @@ func UpdateUser(c echo.Context) (err error) {
 //delete user
 func DeleteUser(c echo.Context) (err error) {
 	id := c.Param("id")
-	db := mysql.connectDB()
+	h := mysql.ConnectDB{}
 	user := models.Users{}
 	var msgError messageFormat
-	if err := db.Find(&user, id).Error; err != nil {
+	if err := h.DB.Find(&user, id).Error; err != nil {
 		msgError.StatusCode = http.StatusNotFound
 		msgError.Message = "Not Found"
 		messageError.Errors = msgError
 		return c.JSON(msgError.StatusCode, messageError)
 	}
 
-	if err := db.Delete(&user).Error; err != nil {
+	if err := h.DB.Delete(&user).Error; err != nil {
 		return c.JSON(http.StatusInternalServerError, "Internal Server Error")
 	}
 
