@@ -8,10 +8,7 @@ import (
 	"os"
 )
 
-var mysql *gorm.DB
-var err error
-
-func Init() {
+func connectDB()  (*gorm.DB, error){
 	//connect database mysql by gorm
 	err := godotenv.Load()
 	if err != nil {
@@ -25,12 +22,5 @@ func Init() {
 	password := os.Getenv("DB_PASSWORD")
 
 	dsn := username + ":" + password + "@tcp(" + dbHost + ":" + dbPort + ")/" + dbName + "?charset=utf8&loc=Asia%2FBangkok&parseTime=true"
-	mysql,err = gorm.Open(dbConnection, dsn)
-	if err != nil {
-		panic("DB Connection Error")
-	}
-}
-
-func connectDB() *gorm.DB {
-	return mysql
+	return gorm.Open(dbConnection, dsn)
 }
