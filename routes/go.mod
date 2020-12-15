@@ -16,4 +16,8 @@ require (
 	gorm.io/gorm v1.20.7
 )
 
-replace github.com/suraboy/go-echo => ../
+replace (
+    github.com/suraboy/go-echo => ../
+    github.com/suraboy/go-echo/models => ../models
+    github.com/suraboy/go-echo/config/mysql => ../config/mysql
+)

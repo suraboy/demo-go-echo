@@ -1,72 +1,21 @@
 package routes
 
 import (
-	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
-	"github.com/joho/godotenv"
 	"github.com/labstack/echo"
+	"github.com/suraboy/go-echo/models"
+	"github.com/suraboy/go-echo/config/mysql"
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
-	"os"
-	"time"
-	"log"
+
 )
 
-
-type (
-	Handler struct {
-		DB *gorm.DB
-	}
-)
-
-//connect database mysql by gorm
-func (h *Handler) connectDB() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
-	dbConnection := os.Getenv("DB_CONNECTION")
-	dbHost := os.Getenv("DB_HOST")
-	dbPort := os.Getenv("DB_PORT")
-	dbName := os.Getenv("DB_DATABASE")
-	username := os.Getenv("DB_USERNAME")
-	password := os.Getenv("DB_PASSWORD")
-
-	dsn := username + ":" + password + "@tcp(" + dbHost + ":" + dbPort + ")/" + dbName + "?charset=utf8&loc=Asia%2FBangkok&parseTime=true"
-	db, err := gorm.Open(dbConnection, dsn)
-
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-	h.DB = db
-}
-
-func UserRoute(e *echo.Echo)  {
-	h := Handler{}
-	h.connectDB()
-	e.GET("/v1/users", h.GetAllUser)
-	e.GET("/v1/users/:id", h.FindUser)
-	e.POST("/v1/users", h.CreateUser)
-	return
-}
-// User
-type Users struct {
-	ID          uint      `gorm:"primary_key" json:"id"`
-	Username    string    `json:"username"`
-	Password    string    `json:"password"`
-	Name        string    `json:"name" xml:"name"`
-	LastName    string    `json:"last_name"`
-	Email       string    `json:"email" xml:"email"`
-	Verify      string    `json:"verify" gorm:"type:enum('waiting','yes','no');default:'waiting'"`
-	Mobile      string    `json:"mobile"`
-	Type        string    `json:"type" gorm:"type:enum('owner','staff','other','admin','customer','brand-owner');default:'other'"`
-	Pin         string    `json:"pin"`
-	Status      string    `json:"status" gorm:"type:enum('active', 'inactive', 'ban');default:'inactive'"`
-	UserGroupId int       `json:"user_group_id"`
-	Gender      string    `json:"gender" gorm:"type:enum('male', 'female');default:'male'"`
-	Birthday    time.Time `json:"birthday"`
-	CreatedAt   time.Time `json:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at"`
+func UserRoute(e *echo.Echo) {
+	e.GET("/v1/users", GetAllUser)
+	e.GET("/v1/users/:id", FindUser)
+	e.POST("/v1/users", CreateUser)
+	e.PUT("/v1/users/:id", UpdateUser)
+	e.DELETE("/v1/users/:id", DeleteUser)
 }
 
 var messageError struct {
@@ -78,23 +27,27 @@ type messageFormat struct {
 	Message    string `json:"message"`
 	Error      string `json:"error"`
 }
-//get user list
-func (h *Handler) GetAllUser(c echo.Context) (err error) {
-	var user []Users
-	h.DB.Find(&user)
-	return c.JSON(http.StatusOK, echo.Map{"data": user})
-}
-//find uset by id
-func (h *Handler) FindUser(c echo.Context) (err error) {
-	id := c.Param("id")
-	user := Users{}
 
-	if err := h.DB.Find(&user, id).Error; err != nil || h.DB.Find(&user, id).RowsAffected == 0 {
+//get user list
+func GetAllUser(c echo.Context) (err error) {
+	db := mysql.connectDB()
+	var user []models.Users
+	db.Find(&user)
+	return c.JSON(http.StatusOK, echo.Map{"datas": user})
+}
+
+//find uset by id
+func FindUser(c echo.Context) (err error) {
+	db := mysql.connectDB()
+	id := c.Param("id")
+	user := models.Users{}
+
+	if err := db.Find(&user, id).Error; err != nil || db.Find(&user, id).RowsAffected == 0 {
 		var msgError messageFormat
-		if h.DB.Find(&user, id).RowsAffected == 0 {
+		if db.Find(&user, id).RowsAffected == 0 {
 			msgError.StatusCode = http.StatusNotFound
 			msgError.Message = "Not Found"
-		}else{
+		} else {
 			msgError.StatusCode = http.StatusInternalServerError
 			msgError.Message = "Internal Server Error"
 			msgError.Error = err.Error()
@@ -107,8 +60,9 @@ func (h *Handler) FindUser(c echo.Context) (err error) {
 }
 
 //create user
-func (h *Handler) CreateUser(c echo.Context) (err error) {
-	user := new(Users)
+func CreateUser(c echo.Context) (err error) {
+	db := mysql.connectDB()
+	user := new(models.Users)
 	if err = c.Bind(user); err != nil {
 		var msgError messageFormat
 		msgError.StatusCode = http.StatusBadRequest
@@ -123,7 +77,7 @@ func (h *Handler) CreateUser(c echo.Context) (err error) {
 		panic(err)
 	}
 	user.Password = string(hashedPassword)
-	if err := h.DB.Create(&user).Error; err != nil {
+	if err := db.Create(&user).Error; err != nil {
 		var msgError messageFormat
 		msgError.StatusCode = http.StatusExpectationFailed
 		msgError.Message = "Expectation Failed"
@@ -133,4 +87,66 @@ func (h *Handler) CreateUser(c echo.Context) (err error) {
 	} // pass pointer of data to Create
 
 	return c.JSON(http.StatusCreated, echo.Map{"data": user})
+}
+
+//update user
+func UpdateUser(c echo.Context) (err error) {
+	pass := ""
+	db := mysql.connectDB()
+	id := c.Param("id")
+	user := models.Users{}
+	var msgError messageFormat
+
+	if err := c.Bind(&user); err != nil {
+		return c.NoContent(http.StatusBadRequest)
+	}
+
+	if user.Password != "" {
+		password := []byte(user.Password)
+		hashedPassword, err := bcrypt.GenerateFromPassword(password, bcrypt.DefaultCost)
+		if err != nil {
+			panic(err)
+		}
+		pass = string(hashedPassword)
+	}
+
+	if err := db.Find(&user, id).Error; err != nil {
+		msgError.StatusCode = http.StatusNotFound
+		msgError.Message = "Not Found"
+		messageError.Errors = msgError
+		return c.JSON(msgError.StatusCode, messageError)
+	}
+
+	if pass != "" {
+		user.Password = pass
+	}
+
+	if err := db.Save(&user).Error; err != nil {
+		msgError.StatusCode = http.StatusExpectationFailed
+		msgError.Message = "Expectation Failed"
+		msgError.Error = err.Error()
+		messageError.Errors = msgError
+		return c.JSON(http.StatusExpectationFailed, messageError)
+	}
+	return c.JSON(http.StatusOK, echo.Map{"data": user})
+}
+
+//delete user
+func DeleteUser(c echo.Context) (err error) {
+	id := c.Param("id")
+	db := mysql.connectDB()
+	user := models.Users{}
+	var msgError messageFormat
+	if err := db.Find(&user, id).Error; err != nil {
+		msgError.StatusCode = http.StatusNotFound
+		msgError.Message = "Not Found"
+		messageError.Errors = msgError
+		return c.JSON(msgError.StatusCode, messageError)
+	}
+
+	if err := db.Delete(&user).Error; err != nil {
+		return c.JSON(http.StatusInternalServerError, "Internal Server Error")
+	}
+
+	return c.NoContent(http.StatusNoContent)
 }
