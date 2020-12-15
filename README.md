@@ -26,6 +26,12 @@ docker-compose up -d
 ```bash
 docker-compose down
 ```
+Database 
+------------------------------------
+You can create database "go_echo" and import sql file in folder database
+```bash
+http://localhost:30081
+```
 
 Running Application
 ------------------------------------

@@ -15,9 +15,45 @@ services:
     environment:
       APP_ENV: local
     networks:
-      network-horeca:
+      network-go-echo:
         aliases:
           - go-echo.eggsmartpos.local
+  go-mariadb:
+    image: mariadb:10.4.3-bionic
+    container_name: go-mariadb
+    restart: always
+    ports:
+      - 33307:3306
+    volumes:
+      - /var/lib/mysql
+    networks:
+      - network-go-echo
+    environment:
+      - MYSQL_ROOT_PASSWORD=suraboy
+    command:
+      - '--character-set-server=utf8mb4'
+      - '--collation-server=utf8mb4_unicode_ci'
+  go-pma:
+    image: phpmyadmin/phpmyadmin:5
+    container_name: go-pma
+    depends_on:
+      - go-mariadb
+    restart: always
+    ports:
+      - 30081:80
+    networks:
+      - network-go-echo
+    environment:
+      PMA_HOST: go-mariadb
+      PMA_PORT: 3306
+    healthcheck:
+      test: curl -f http://localhost
+      start_period: 30s
+      interval: 30s
+      timeout: 15s
+      retries: 3
+
 networks:
-  network-horeca:
-    external: true
+  network-go-echo:
+    external: false
+    name: network-go-echo
