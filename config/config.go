@@ -8,7 +8,7 @@ import (
 	"os"
 )
 
-func (h *ConnectDB) connectDB() {
+func connectDB(h *gorm.DB) {
 	//connect database mysql by gorm
 	err := godotenv.Load()
 	if err != nil {
@@ -26,11 +26,5 @@ func (h *ConnectDB) connectDB() {
 	if err != nil {
 		log.Fatal("Database connect refuse")
 	}
-	h.DB = db
+	db.Close()
 }
-
-type (
-	ConnectDB struct {
-		DB *gorm.DB
-	}
-)

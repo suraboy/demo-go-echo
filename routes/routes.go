@@ -4,10 +4,16 @@ import (
 	"github.com/labstack/echo"
 	"github.com/suraboy/go-echo/config"
 	"github.com/suraboy/go-echo/models"
+	"github.com/jinzhu/gorm"
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
 )
 
+type (
+	ConnectDB struct {
+		DB *gorm.DB
+	}
+)
 
 func UserRoute(e *echo.Echo) {
 	e.GET("/v1/users", GetAllUser)
@@ -29,7 +35,8 @@ type messageFormat struct {
 
 //get user list
 func GetAllUser(c echo.Context) (err error) {
-	h := config.ConnectDB{}
+	h := ConnectDB{}
+	config.connectDB()
 	var user []models.Users
 	h.DB.Find(&user)
 	return c.JSON(http.StatusOK, echo.Map{"datas": user})
