@@ -8,8 +8,8 @@ import (
 	"os"
 )
 
-func connectDB() (h *gorm.DB) {
-	//connect database mysql by gorm
+func DbManager() (h *Handler) {
+	h = new(Handler)
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Error loading .env file")
@@ -23,8 +23,17 @@ func connectDB() (h *gorm.DB) {
 
 	dsn := username + ":" + password + "@tcp(" + dbHost + ":" + dbPort + ")/" + dbName + "?charset=utf8&loc=Asia%2FBangkok&parseTime=true"
 	db, err := gorm.Open(dbConnection, dsn)
+
 	if err != nil {
-		log.Fatal("Database connect refuse")
+		log.Fatal(err.Error())
 	}
-	db.Close()
+	h.DB = db
+	return h
 }
+
+type (
+	Handler struct {
+		DB *gorm.DB
+	}
+)
+
