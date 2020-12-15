@@ -9,12 +9,14 @@ import (
 	"net/http"
 )
 
+
 func UserRoute(e *echo.Echo) {
-	e.GET("/v1/users", GetAllUser)
-	e.GET("/v1/users/:id", FindUser)
-	e.POST("/v1/users", CreateUser)
-	e.PUT("/v1/users/:id", UpdateUser)
-	e.DELETE("/v1/users/:id", DeleteUser)
+	h := mysql.ConnectDB{}
+	e.GET("/v1/users", h.GetAllUser)
+	e.GET("/v1/users/:id", h.FindUser)
+	e.POST("/v1/users", h.CreateUser)
+	e.PUT("/v1/users/:id", h.UpdateUser)
+	e.DELETE("/v1/users/:id", h.DeleteUser)
 }
 
 var messageError struct {
@@ -29,7 +31,6 @@ type messageFormat struct {
 
 //get user list
 func GetAllUser(c echo.Context) (err error) {
-	db := mysql.connectDB()
 	var user []models.Users
 	db.Find(&user)
 	return c.JSON(http.StatusOK, echo.Map{"datas": user})
