@@ -7,7 +7,8 @@ import (
 	"log"
 	"os"
 )
-var db *gorm.DB
+
+var mysql *gorm.DB
 var err error
 
 func Init() {
@@ -24,11 +25,12 @@ func Init() {
 	password := os.Getenv("DB_PASSWORD")
 
 	dsn := username + ":" + password + "@tcp(" + dbHost + ":" + dbPort + ")/" + dbName + "?charset=utf8&loc=Asia%2FBangkok&parseTime=true"
-	if gorm.Open(dbConnection, dsn);err != nil{
+	mysql,err = gorm.Open(dbConnection, dsn)
+	if err != nil {
 		panic("DB Connection Error")
 	}
 }
 
 func connectDB() *gorm.DB {
-	return db
+	return mysql
 }

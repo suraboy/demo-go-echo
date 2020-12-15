@@ -3,11 +3,10 @@ package routes
 import (
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"github.com/labstack/echo"
-	"github.com/suraboy/go-echo/models"
 	"github.com/suraboy/go-echo/config/mysql"
+	"github.com/suraboy/go-echo/models"
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
-
 )
 
 func UserRoute(e *echo.Echo) {

@@ -9,7 +9,7 @@ require (
 	github.com/labstack/echo v3.3.10+incompatible
 	github.com/labstack/echo/v4 v4.1.17 // indirect
 	github.com/labstack/gommon v0.3.0 // indirect
-	github.com/suraboy/go-echo v1.0.6 // indirect
+	github.com/suraboy/go-echo v1.0.8 // indirect
 	github.com/uniplaces/carbon v0.1.6 // indirect
 	golang.org/x/crypto v0.0.0-20201124201722-c8d3bf9c5392
 	gorm.io/driver/mysql v1.0.3 // indirect
