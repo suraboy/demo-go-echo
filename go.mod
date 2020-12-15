@@ -5,7 +5,6 @@ go 1.15
 replace (
 	github.com/suraboy/go-echo/config => ./config
 	github.com/suraboy/go-echo/models => ./models
-	github.com/suraboy/go-echo/routes => ./routes
 )
 
 require (
