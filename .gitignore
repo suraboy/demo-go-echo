@@ -2,3 +2,5 @@
 server
 go.sum
 go-echo
+docker
+docker-compose.yml
