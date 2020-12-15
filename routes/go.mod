@@ -6,6 +6,7 @@ replace (
 	github.com/suraboy/go-echo => ../
 	github.com/suraboy/go-echo/config => ../config
 	github.com/suraboy/go-echo/models => ../models
+	github.com/suraboy/go-echo/api => ../api
 )
 
 require (

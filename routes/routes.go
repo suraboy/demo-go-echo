@@ -4,12 +4,13 @@ import (
 	"github.com/labstack/echo"
 	mysql "github.com/suraboy/go-echo/config"
 	"github.com/suraboy/go-echo/models"
+	"github.com/suraboy/go-echo/api"
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
 )
 
 func UserRoute(e *echo.Echo) {
-	e.GET("/v1/users", GetAllUser)
+	e.GET("/v1/users", api.GetAllUser)
 	e.GET("/v1/users/:id", FindUser)
 	e.POST("/v1/users", CreateUser)
 	e.PUT("/v1/users/:id", UpdateUser)
@@ -24,14 +25,6 @@ type messageFormat struct {
 	StatusCode int    `json:"status_code"`
 	Message    string `json:"message"`
 	Error      string `json:"error"`
-}
-
-//get user list
-func GetAllUser(c echo.Context) (err error) {
-	mysql := mysql.DbManager()
-	var user []models.Users
-	mysql.DB.Find(&user)
-	return c.JSON(http.StatusOK, echo.Map{"data": user})
 }
 
 //find uset by id
