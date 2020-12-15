@@ -1,9 +1,8 @@
 package routes
 
 import (
-	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"github.com/labstack/echo"
-	"github.com/suraboy/go-echo/config/mysql"
+	"github.com/suraboy/go-echo/config"
 	"github.com/suraboy/go-echo/models"
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
@@ -30,8 +29,7 @@ type messageFormat struct {
 
 //get user list
 func GetAllUser(c echo.Context) (err error) {
-	h := mysql.ConnectDB{}
-	mysql.connectDB()
+	h := config.ConnectDB{}
 	var user []models.Users
 	h.DB.Find(&user)
 	return c.JSON(http.StatusOK, echo.Map{"datas": user})
@@ -39,7 +37,7 @@ func GetAllUser(c echo.Context) (err error) {
 
 //find uset by id
 func FindUser(c echo.Context) (err error) {
-	h := mysql.ConnectDB{}
+	h := config.ConnectDB{}
 	id := c.Param("id")
 	user := models.Users{}
 
@@ -62,7 +60,7 @@ func FindUser(c echo.Context) (err error) {
 
 //create user
 func CreateUser(c echo.Context) (err error) {
-	h := mysql.ConnectDB{}
+	h := config.ConnectDB{}
 	user := new(models.Users)
 	if err = c.Bind(user); err != nil {
 		var msgError messageFormat
@@ -93,7 +91,7 @@ func CreateUser(c echo.Context) (err error) {
 //update user
 func UpdateUser(c echo.Context) (err error) {
 	pass := ""
-	h := mysql.ConnectDB{}
+	h := config.ConnectDB{}
 	id := c.Param("id")
 	user := models.Users{}
 	var msgError messageFormat
@@ -135,7 +133,7 @@ func UpdateUser(c echo.Context) (err error) {
 //delete user
 func DeleteUser(c echo.Context) (err error) {
 	id := c.Param("id")
-	h := mysql.ConnectDB{}
+	h := config.ConnectDB{}
 	user := models.Users{}
 	var msgError messageFormat
 	if err := h.DB.Find(&user, id).Error; err != nil {

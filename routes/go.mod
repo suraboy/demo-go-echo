@@ -19,5 +19,5 @@ require (
 replace (
     github.com/suraboy/go-echo => ../
     github.com/suraboy/go-echo/models => ../models
-    github.com/suraboy/go-echo/config/mysql => ../config/mysql
+    github.com/suraboy/go-echo/config => ../config
 )
