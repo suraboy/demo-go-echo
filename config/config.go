@@ -8,7 +8,7 @@ import (
 	"os"
 )
 
-func connectDB(h *gorm.DB) {
+func connectDB() (h *gorm.DB) {
 	//connect database mysql by gorm
 	err := godotenv.Load()
 	if err != nil {
