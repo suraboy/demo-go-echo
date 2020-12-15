@@ -31,7 +31,7 @@ type messageFormat struct {
 //get user list
 func GetAllUser(c echo.Context) (err error) {
 	h := mysql.ConnectDB{}
-	h.DB = mysql.connectDB()
+	mysql.connectDB()
 	var user []models.Users
 	h.DB.Find(&user)
 	return c.JSON(http.StatusOK, echo.Map{"datas": user})

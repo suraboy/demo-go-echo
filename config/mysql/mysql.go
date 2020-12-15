@@ -8,7 +8,7 @@ import (
 	"os"
 )
 
-func connectDB() {
+func connectDB() (DB *gorm.DB) {
 	//connect database mysql by gorm
 	err := godotenv.Load()
 	if err != nil {
@@ -24,9 +24,9 @@ func connectDB() {
 	dsn := username + ":" + password + "@tcp(" + dbHost + ":" + dbPort + ")/" + dbName + "?charset=utf8&loc=Asia%2FBangkok&parseTime=true"
 	db, err := gorm.Open(dbConnection, dsn)
 	if err != nil {
-		log.Fatal(err.Error())
+		log.Fatal("Database connect refuse")
 	}
-	db.Close()
+	return db
 }
 
 type (
