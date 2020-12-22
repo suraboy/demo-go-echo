@@ -11,7 +11,7 @@ func main() {
 	e := echo.New()
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
-	e.GET("/", func(c echo.Context) error {
+	e.GET("/", func(c echo.Context) (err error) {
 		return c.JSON(http.StatusOK, "Hello Go-echo 11")
 	})
 
