@@ -1,6 +1,8 @@
 package api
 
 import (
+	"cloud.google.com/go/logging"
+	"context"
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/pem"
@@ -28,9 +30,21 @@ type messageFormat struct {
 
 //get user list
 func GetAllUser(c echo.Context) (err error) {
+	var msgError messageFormat
 	mysql := mysql.DbManager()
 	var user []models.Users
 	mysql.DB.Find(&user)
+	ctx := context.Background()
+	client, err := logging.NewClient(ctx, "horeca-logging")
+	if err != nil {
+		msgError.StatusCode = http.StatusInternalServerError
+		msgError.Message = "Internal Server Error"
+		msgError.Error = err.Error()
+		messageError.Errors = msgError
+		return c.JSON(msgError.StatusCode, messageError)
+	}
+	logger := client.Logger("app")
+	logger.Log(logging.Entry{Payload: "Test Logging happened!!!"})
 	return c.JSON(http.StatusOK, echo.Map{"data": user})
 }
 
