@@ -44,3 +44,10 @@ Open the browser
 http://localhost:7304
 ```
 
+Google Cloud Logging
+------------------------------------
+How to guides logging.
+```bash
+https://cloud.google.com/logging/docs/setup/go
+```
+
