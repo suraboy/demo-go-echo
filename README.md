@@ -50,4 +50,9 @@ How to guides logging.
 ```bash
 https://cloud.google.com/logging/docs/setup/go
 ```
+Example
+```bash
+/api/users.go -> GetAllUser()
+```
+
 
