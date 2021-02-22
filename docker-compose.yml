@@ -11,7 +11,7 @@ services:
       - "7304:8080"
     volumes:
       - ./:/app
-      - ./.env.local:/app/.env:cached
+      - ./.env.local:/app/.env
     environment:
       APP_ENV: local
     networks:
@@ -19,6 +19,7 @@ services:
         aliases:
           - go-echo.eggsmartpos.local
   go-mariadb:
+    platform: linux/arm64
     image: mariadb:10.4.3-bionic
     container_name: go-mariadb
     restart: always

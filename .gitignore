@@ -4,3 +4,4 @@ go.sum
 go-echo
 docker
 docker-compose.yml
+service-account-key.json
