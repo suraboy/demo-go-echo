@@ -28,7 +28,6 @@ type messageFormat struct {
 	Error      string `json:"error"`
 }
 
-//get user list
 func GetAllUser(c echo.Context) (err error) {
 	var msgError messageFormat
 	mysql := mysql.DbManager()
@@ -48,7 +47,6 @@ func GetAllUser(c echo.Context) (err error) {
 	return c.JSON(http.StatusOK, echo.Map{"data": user})
 }
 
-//find uset by id
 func FindUser(c echo.Context) (err error) {
 	mysql := mysql.DbManager()
 	id := c.Param("id")
@@ -71,7 +69,6 @@ func FindUser(c echo.Context) (err error) {
 	return c.JSON(http.StatusOK, echo.Map{"data": user})
 }
 
-//create user
 func CreateUser(c echo.Context) (err error) {
 	mysql := mysql.DbManager()
 	user := new(models.Users)
@@ -107,7 +104,6 @@ func CreateUser(c echo.Context) (err error) {
 	return c.JSON(http.StatusCreated, echo.Map{"data": user})
 }
 
-//update user
 func UpdateUser(c echo.Context) (err error) {
 	pass := ""
 	mysql := mysql.DbManager()
@@ -149,7 +145,6 @@ func UpdateUser(c echo.Context) (err error) {
 	return c.JSON(http.StatusOK, echo.Map{"data": user})
 }
 
-//delete user
 func DeleteUser(c echo.Context) (err error) {
 	id := c.Param("id")
 	mysql := mysql.DbManager()
@@ -170,39 +165,56 @@ func DeleteUser(c echo.Context) (err error) {
 }
 
 type RequestLogin struct {
-	Username string `json:"username" sql:"username"`
-	Password string `json:"password" sql:"username"`
+	Username string `json:"username" validate:"required"`
+	Password string `json:"password" validate:"required"`
 }
 
 type ResponseToken struct {
-	TokenType string `json:"token_type"`
-	ExpiresIn int64 `json:"expires_in"`
-	AccessToken string `json:"access_token"`
+	TokenType    string `json:"token_type"`
+	ExpiresIn    int64  `json:"expires_in"`
+	AccessToken  string `json:"access_token"`
 	RefreshToken string `json:"refresh_token"`
 }
 
 func LoginUser(c echo.Context) (err error) {
 	var msgError messageFormat
 	var response ResponseToken
+	user := new(models.Users)
 	mysql := mysql.DbManager()
-	req := RequestLogin{}
-	user := models.Users{}
-
-	if err := c.Bind(&req); err != nil {
-		return c.NoContent(http.StatusBadRequest)
+	req := new(RequestLogin)
+	if err = c.Bind(req); err != nil {
+		msgError.StatusCode = http.StatusBadRequest
+		msgError.Message = "Bad Request"
+		msgError.Error = err.Error()
+		messageError.Errors = msgError
+		return c.JSON(msgError.StatusCode, messageError)
 	}
-	if err := mysql.DB.Where("username = ?", req.Username).Where("password = ?", req.Password).Find(&user).Error; err != nil {
-		msgError.StatusCode = http.StatusNotFound
-		msgError.Message = "Not Found"
+	if err = c.Validate(req); err != nil {
+		msgError.StatusCode = http.StatusUnprocessableEntity
+		msgError.Message = "The given data was invalid."
+		msgError.Error = err.Error()
 		messageError.Errors = msgError
 		return c.JSON(msgError.StatusCode, messageError)
 	}
 
-	////compare the user from the request, with the one we defined:
-	//if user.Username != user.Username || user.Password != user.Password {
-	//	return c.JSON(http.StatusUnauthorized, "Please provide valid login details")
-	//}
-	token, err := CreateToken(user)
+	//var result []string
+	if err := mysql.DB.Where("username = ?", req.Username).Find(&user).Error; err != nil {
+		msgError.StatusCode = http.StatusNotFound
+		msgError.Message = "Not found."
+		messageError.Errors = msgError
+		return c.JSON(msgError.StatusCode, messageError)
+	}
+
+	match := CheckPasswordHash(req.Password, user.Password)
+	//compare the user from the request, with the one we defined:
+	if match != true {
+		msgError.StatusCode = http.StatusUnauthorized
+		msgError.Message = "Please provide valid login details"
+		return c.JSON(msgError.StatusCode, msgError)
+	}
+
+	token, err := CreateToken(*user)
+
 	if err != nil {
 		return c.JSON(http.StatusUnprocessableEntity, err.Error())
 	}
@@ -210,7 +222,12 @@ func LoginUser(c echo.Context) (err error) {
 	response.AccessToken = token
 	response.ExpiresIn = time.Now().Add(time.Minute * 15).Unix()
 	response.TokenType = "Bearer"
-	return c.JSON(http.StatusOK,response)
+	return c.JSON(http.StatusOK, response)
+}
+
+func CheckPasswordHash(password, hash string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+	return err == nil
 }
 
 func CreateToken(user models.Users) (string, error) {
